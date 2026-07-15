@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Simple dancing cat line frame 7">
+<title>Simple dancing cat line frame 7</title>
+<style>
+  .outer, .inner { fill: none; stroke: #111; stroke-linecap: round; stroke-linejoin: round; }
+  .outer { stroke-width: 13; }
+  .inner { stroke-width: 10; }
+  .face { stroke-width: 8.5; }
+  .eye { fill: #111; }
+</style>
+<g id="frame-10">
+<path class="outer" d="M 326.4 39.3 L 293.3 60 L 275.1 63.3 L 252.7 61.7 L 235.3 44.3 L 226.2 42.6 L 217.9 57.5 L 211.2 109.7 L 212.9 121.3 L 207.1 128 L 102.7 56.7 L 95.2 55 L 91.9 59.2 L 108.5 90.7 L 107.7 97.3 L 96.1 110.6 L 100.2 113.9 L 125.9 111.4 L 140.8 118 L 179.8 161.9 L 194.7 174.4 L 215.4 183.5 L 227.8 196.7 L 226.2 210.8 L 212.1 244 L 199.6 288.7 L 181.4 332.7 L 168.2 352.5 L 161.5 374.1 L 163.2 413 L 200.5 438.7 L 202.1 455.3 L 212.9 466.9 L 229.5 468.6 L 244.4 453.7 L 251.9 452 L 270.9 475.2 L 295 477.7 L 301.6 468.6 L 299.9 444.5 L 338 393.2 L 331.4 312.8 L 348 254.8 L 366.2 230.7 L 367.9 209.2 L 357.9 184.3 L 324.8 153.7 L 333.1 113 L 328.1 87.4 L 329.8 42.6 Z"/>
+<path class="inner face" d="M 217.9 62.5 Q 222.9 80.7 231.1 93.2"/>
+<path class="inner face" d="M 309 62.5 Q 304.1 80.7 295.8 93.2"/>
+<path class="inner face" d="M 259.3 148.7 L 263.5 152.8 L 267.6 148.7 M 263.5 152.8 L 263.5 158.6 M 263.5 158.6 Q 257.7 164.4 251.9 161.1 M 263.5 158.6 Q 269.3 164.4 275.1 161.1"/>
+<circle class="eye" cx="240.3" cy="126.3" r="5.2"/>
+<circle class="eye" cx="286.7" cy="126.3" r="5.2"/>
+<path class="inner" d="M 216.2 195.1 C 194.7 167.7 173.1 142 151.6 114.7"/>
+<path class="inner" d="M 302.4 211.7 C 323.1 225.8 335.6 244.8 341.4 266.4"/>
+<path class="inner" d="M 256.8 477.7 C 255.2 469.4 255.2 459.5 257.7 450.3"/>
+</g>
+</svg>

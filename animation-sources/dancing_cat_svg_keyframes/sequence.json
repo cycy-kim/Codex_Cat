@@ -1,0 +1,28 @@
+{
+  "canvas": {
+    "width": 512,
+    "height": 512,
+    "format": "svg"
+  },
+  "frame_count": 6,
+  "recommended_order": [
+    "frame_01.svg",
+    "frame_02.svg",
+    "frame_03.svg",
+    "frame_04.svg",
+    "frame_05.svg",
+    "frame_06.svg"
+  ],
+  "recommended_timing_ms": [
+    90,
+    110,
+    100,
+    90,
+    100,
+    110
+  ],
+  "loop": true,
+  "notes": [
+    "reference image를 기준으로 포즈를 직접 벡터화했습니다."
+  ]
+}

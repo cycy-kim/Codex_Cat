@@ -1,0 +1,35 @@
+# Repository and editor metadata
+.git/**
+.github/**
+.agents/**
+.codex/**
+.vscode/**
+.gitignore
+.vscodeignore
+.DS_Store
+**/.DS_Store
+
+# Development dependencies, source, tests, and tooling
+node_modules/**
+src/**
+out/**
+tools/**
+.vscode-test/**
+.vscode-test.*
+.generated/**
+coverage/**
+
+# Development-only animation artwork and configuration
+animation-sources/**
+cat-animation.json
+
+# Build and release configuration
+package-lock.json
+tsconfig.json
+eslint.config.*
+RELEASING.md
+*.vsix
+
+# Generated debug and font metadata
+dist/**/*.map
+media/**/*.json

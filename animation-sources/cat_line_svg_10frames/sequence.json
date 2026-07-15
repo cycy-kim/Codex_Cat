@@ -1,0 +1,49 @@
+{
+  "canvas": {
+    "width": 512,
+    "height": 512,
+    "format": "svg"
+  },
+  "frame_count": 10,
+  "recommended_order": [
+    "frame_01.svg",
+    "frame_02.svg",
+    "frame_03.svg",
+    "frame_04.svg",
+    "frame_05.svg",
+    "frame_06.svg",
+    "frame_07.svg",
+    "frame_08.svg",
+    "frame_09.svg",
+    "frame_10.svg"
+  ],
+  "recommended_timing_ms": [
+    160,
+    160,
+    160,
+    160,
+    160,
+    160,
+    160,
+    160,
+    160,
+    160
+  ],
+  "loop": true,
+  "source_frames": [
+    1,
+    2,
+    3,
+    5,
+    7,
+    8,
+    10,
+    12,
+    13,
+    14
+  ],
+  "preview": "preview_animation.svg",
+  "notes": [
+    "The bundled preview runs for 1.6 seconds, so each of the 10 frames is shown for 160 ms."
+  ]
+}

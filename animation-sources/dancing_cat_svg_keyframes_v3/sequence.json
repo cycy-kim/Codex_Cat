@@ -1,0 +1,118 @@
+{
+  "canvas": {
+    "width": 512,
+    "height": 512,
+    "transparent": true
+  },
+  "frame_count": 12,
+  "loop": true,
+  "recommended_order": [
+    "frame_01.svg",
+    "frame_02.svg",
+    "frame_03.svg",
+    "frame_04.svg",
+    "frame_05.svg",
+    "frame_06.svg",
+    "frame_07.svg",
+    "frame_08.svg",
+    "frame_09.svg",
+    "frame_10.svg",
+    "frame_11.svg",
+    "frame_12.svg"
+  ],
+  "recommended_timing_ms": [
+    105,
+    75,
+    105,
+    75,
+    105,
+    75,
+    105,
+    75,
+    105,
+    75,
+    105,
+    75
+  ],
+  "stroke": "approximately 2x thicker than previous set; uniform black vector fill generated from ~11 px centerline stroke",
+  "frames": [
+    {
+      "kind": "key",
+      "source_pose": "A",
+      "file": "frame_01.svg"
+    },
+    {
+      "kind": "inbetween",
+      "from": "A",
+      "to": "B",
+      "source_pose": "B",
+      "t": 0.5,
+      "file": "frame_02.svg"
+    },
+    {
+      "kind": "key",
+      "source_pose": "B",
+      "file": "frame_03.svg"
+    },
+    {
+      "kind": "inbetween",
+      "from": "B",
+      "to": "D",
+      "source_pose": "B",
+      "t": 0.5,
+      "file": "frame_04.svg"
+    },
+    {
+      "kind": "key",
+      "source_pose": "D",
+      "file": "frame_05.svg"
+    },
+    {
+      "kind": "inbetween",
+      "from": "D",
+      "to": "C",
+      "source_pose": "C",
+      "t": 0.5,
+      "file": "frame_06.svg"
+    },
+    {
+      "kind": "key",
+      "source_pose": "C",
+      "file": "frame_07.svg"
+    },
+    {
+      "kind": "inbetween",
+      "from": "C",
+      "to": "F",
+      "source_pose": "F",
+      "t": 0.5,
+      "file": "frame_08.svg"
+    },
+    {
+      "kind": "key",
+      "source_pose": "F",
+      "file": "frame_09.svg"
+    },
+    {
+      "kind": "inbetween",
+      "from": "F",
+      "to": "E",
+      "source_pose": "E",
+      "t": 0.5,
+      "file": "frame_10.svg"
+    },
+    {
+      "kind": "key",
+      "source_pose": "E",
+      "file": "frame_11.svg"
+    },
+    {
+      "kind": "inbetween",
+      "from": "E",
+      "to": "A",
+      "source_pose": "A",
+      "t": 0.5,
+      "file": "frame_12.svg"
+    }
+  ]
+}

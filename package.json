@@ -1,0 +1,500 @@
+{
+  "name": "codex-cat",
+  "displayName": "Codex Cat",
+  "description": "A status bar cat that animates while Codex is working",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cycy-kim/Codex_Cat.git"
+  },
+  "homepage": "https://github.com/cycy-kim/Codex_Cat#readme",
+  "bugs": {
+    "url": "https://github.com/cycy-kim/Codex_Cat/issues"
+  },
+  "engines": {
+    "vscode": "^1.125.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "openai.chatgpt"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "icons": {
+      "codex-cat-frame-01": {
+        "description": "Codex Cat animation frame 1",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E001"
+        }
+      },
+      "codex-cat-frame-02": {
+        "description": "Codex Cat animation frame 2",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E002"
+        }
+      },
+      "codex-cat-frame-03": {
+        "description": "Codex Cat animation frame 3",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E003"
+        }
+      },
+      "codex-cat-frame-04": {
+        "description": "Codex Cat animation frame 4",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E004"
+        }
+      },
+      "codex-cat-frame-05": {
+        "description": "Codex Cat animation frame 5",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E005"
+        }
+      },
+      "codex-cat-frame-06": {
+        "description": "Codex Cat animation frame 6",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E006"
+        }
+      },
+      "codex-cat-frame-07": {
+        "description": "Codex Cat animation frame 7",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E007"
+        }
+      },
+      "codex-cat-frame-08": {
+        "description": "Codex Cat animation frame 8",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E008"
+        }
+      },
+      "codex-cat-frame-09": {
+        "description": "Codex Cat animation frame 9",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E009"
+        }
+      },
+      "codex-cat-frame-10": {
+        "description": "Codex Cat animation frame 10",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E00A"
+        }
+      },
+      "codex-cat-frame-11": {
+        "description": "Codex Cat animation frame 11",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E00B"
+        }
+      },
+      "codex-cat-frame-12": {
+        "description": "Codex Cat animation frame 12",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E00C"
+        }
+      },
+      "codex-cat-frame-13": {
+        "description": "Codex Cat animation frame 13",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E00D"
+        }
+      },
+      "codex-cat-frame-14": {
+        "description": "Codex Cat animation frame 14",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E00E"
+        }
+      },
+      "codex-cat-frame-15": {
+        "description": "Codex Cat animation frame 15",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E00F"
+        }
+      },
+      "codex-cat-frame-16": {
+        "description": "Codex Cat animation frame 16",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E010"
+        }
+      },
+      "codex-cat-frame-17": {
+        "description": "Codex Cat animation frame 17",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E011"
+        }
+      },
+      "codex-cat-frame-18": {
+        "description": "Codex Cat animation frame 18",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E012"
+        }
+      },
+      "codex-cat-frame-19": {
+        "description": "Codex Cat animation frame 19",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E013"
+        }
+      },
+      "codex-cat-frame-20": {
+        "description": "Codex Cat animation frame 20",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E014"
+        }
+      },
+      "codex-cat-frame-21": {
+        "description": "Codex Cat animation frame 21",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E015"
+        }
+      },
+      "codex-cat-frame-22": {
+        "description": "Codex Cat animation frame 22",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E016"
+        }
+      },
+      "codex-cat-frame-23": {
+        "description": "Codex Cat animation frame 23",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E017"
+        }
+      },
+      "codex-cat-frame-24": {
+        "description": "Codex Cat animation frame 24",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E018"
+        }
+      },
+      "codex-cat-frame-25": {
+        "description": "Codex Cat animation frame 25",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E019"
+        }
+      },
+      "codex-cat-frame-26": {
+        "description": "Codex Cat animation frame 26",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E01A"
+        }
+      },
+      "codex-cat-frame-27": {
+        "description": "Codex Cat animation frame 27",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E01B"
+        }
+      },
+      "codex-cat-frame-28": {
+        "description": "Codex Cat animation frame 28",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E01C"
+        }
+      },
+      "codex-cat-frame-29": {
+        "description": "Codex Cat animation frame 29",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E01D"
+        }
+      },
+      "codex-cat-frame-30": {
+        "description": "Codex Cat animation frame 30",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E01E"
+        }
+      },
+      "codex-cat-frame-31": {
+        "description": "Codex Cat animation frame 31",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E01F"
+        }
+      },
+      "codex-cat-frame-32": {
+        "description": "Codex Cat animation frame 32",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E020"
+        }
+      },
+      "codex-cat-frame-33": {
+        "description": "Codex Cat animation frame 33",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E021"
+        }
+      },
+      "codex-cat-frame-34": {
+        "description": "Codex Cat animation frame 34",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E022"
+        }
+      },
+      "codex-cat-frame-35": {
+        "description": "Codex Cat animation frame 35",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E023"
+        }
+      },
+      "codex-cat-frame-36": {
+        "description": "Codex Cat animation frame 36",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E024"
+        }
+      },
+      "codex-cat-frame-37": {
+        "description": "Codex Cat animation frame 37",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E025"
+        }
+      },
+      "codex-cat-frame-38": {
+        "description": "Codex Cat animation frame 38",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E026"
+        }
+      },
+      "codex-cat-frame-39": {
+        "description": "Codex Cat animation frame 39",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E027"
+        }
+      },
+      "codex-cat-frame-40": {
+        "description": "Codex Cat animation frame 40",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E028"
+        }
+      },
+      "codex-cat-frame-41": {
+        "description": "Codex Cat animation frame 41",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E029"
+        }
+      },
+      "codex-cat-frame-42": {
+        "description": "Codex Cat animation frame 42",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E02A"
+        }
+      },
+      "codex-cat-frame-43": {
+        "description": "Codex Cat animation frame 43",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E02B"
+        }
+      },
+      "codex-cat-frame-44": {
+        "description": "Codex Cat animation frame 44",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E02C"
+        }
+      },
+      "codex-cat-frame-45": {
+        "description": "Codex Cat animation frame 45",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E02D"
+        }
+      },
+      "codex-cat-frame-46": {
+        "description": "Codex Cat animation frame 46",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E02E"
+        }
+      },
+      "codex-cat-frame-47": {
+        "description": "Codex Cat animation frame 47",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E02F"
+        }
+      },
+      "codex-cat-frame-48": {
+        "description": "Codex Cat animation frame 48",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E030"
+        }
+      },
+      "codex-cat-frame-49": {
+        "description": "Codex Cat animation frame 49",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E031"
+        }
+      },
+      "codex-cat-frame-50": {
+        "description": "Codex Cat animation frame 50",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E032"
+        }
+      },
+      "codex-cat-frame-51": {
+        "description": "Codex Cat animation frame 51",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E033"
+        }
+      },
+      "codex-cat-frame-52": {
+        "description": "Codex Cat animation frame 52",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E034"
+        }
+      },
+      "codex-cat-frame-53": {
+        "description": "Codex Cat animation frame 53",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E035"
+        }
+      },
+      "codex-cat-frame-54": {
+        "description": "Codex Cat animation frame 54",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E036"
+        }
+      },
+      "codex-cat-frame-55": {
+        "description": "Codex Cat animation frame 55",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E037"
+        }
+      },
+      "codex-cat-frame-56": {
+        "description": "Codex Cat animation frame 56",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E038"
+        }
+      },
+      "codex-cat-frame-57": {
+        "description": "Codex Cat animation frame 57",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E039"
+        }
+      },
+      "codex-cat-frame-58": {
+        "description": "Codex Cat animation frame 58",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E03A"
+        }
+      },
+      "codex-cat-frame-59": {
+        "description": "Codex Cat animation frame 59",
+        "default": {
+          "fontPath": "./media/codex-cat-frames.woff",
+          "fontCharacter": "\\E03B"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "codexCat.installHooks",
+        "title": "Codex Cat: Install Hooks"
+      },
+      {
+        "command": "codexCat.reinstallHooks",
+        "title": "Codex Cat: Reinstall Hooks"
+      },
+      {
+        "command": "codexCat.uninstallHooks",
+        "title": "Codex Cat: Uninstall Hooks"
+      },
+      {
+        "command": "codexCat.testStart",
+        "title": "Codex Cat: Test Start"
+      },
+      {
+        "command": "codexCat.testStop",
+        "title": "Codex Cat: Test Stop"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build:production",
+    "vscode:uninstall": "node ./dist/uninstall.js",
+    "generate:icons": "node tools/generate-cat-animation.cjs",
+    "check-types": "tsc --noEmit -p ./",
+    "bundle": "node tools/build-extension.cjs",
+    "compile": "npm run generate:icons && npm run check-types && npm run bundle",
+    "build:production": "npm run generate:icons && npm run check-types && npm run bundle -- --production",
+    "watch": "npm run generate:icons && node tools/build-extension.cjs --watch",
+    "pretest": "npm run compile && npm run lint && tsc -p ./",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "package:check": "npm run build:production && npm run lint && node tools/verify-package-contents.cjs",
+    "package:vsix": "vsce package"
+  },
+  "devDependencies": {
+    "@neplex/vectorizer": "^0.1.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "@types/vscode": "^1.125.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "fantasticon": "^4.1.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  }
+}
