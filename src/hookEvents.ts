@@ -56,6 +56,8 @@ export function updateActiveTurnIds(
   const nextActiveTurnIds = new Set(activeTurnIds);
 
   if (event.type === 'UserPromptSubmit') {
+    // A replaced or interrupted turn may not emit Stop. Track one active key
+    // per session so a newer turn cannot leave an older turn orphaned.
     nextActiveTurnIds.add(getSubmitKey(event));
     return nextActiveTurnIds;
   }
@@ -96,12 +98,12 @@ export function haveBothHookEventTypesBeenObserved(
 }
 
 function getSubmitKey(event: CodexHookEvent): string {
-  if (event.turnId) {
-    return `${TURN_KEY_PREFIX}${event.turnId}`;
-  }
-
   if (event.sessionId) {
     return `${SESSION_KEY_PREFIX}${event.sessionId}`;
+  }
+
+  if (event.turnId) {
+    return `${TURN_KEY_PREFIX}${event.turnId}`;
   }
 
   return ANONYMOUS_KEY;

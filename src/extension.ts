@@ -36,13 +36,16 @@ const FILE_WATCH_INTERVAL_MS = 200;
 // Keep the original storage key so existing working installations retain
 // their evidence across extension updates.
 const LAST_WORKING_HOOK_SIGNATURE_KEY = 'codexCat.verifiedHookSignature';
+const HOOK_REVIEW_OPEN_KEY = 'codexCat.hookReviewOpen';
 
 const INSTALL_HOOKS_COMMAND = 'codexCat.installHooks';
 const REINSTALL_HOOKS_COMMAND = 'codexCat.reinstallHooks';
 const UNINSTALL_HOOKS_COMMAND = 'codexCat.uninstallHooks';
 const REVIEW_HOOKS_COMMAND = 'codexCat.reviewHooks';
+const RETURN_TO_CODEX_COMMAND = 'codexCat.returnToCodex';
 const CODEX_EXTENSION_ID = 'openai.chatgpt';
 const CODEX_HOOKS_SETTINGS_PATH = '/settings/hooks-settings';
+const CODEX_NEW_CHAT_COMMAND = 'chatgpt.newChat';
 const REVIEW_HOOKS_ACTION = 'Review Hooks';
 
 const SETUP_ACTION_COMMANDS: Record<SetupAction, string> = {
@@ -53,6 +56,7 @@ const SETUP_ACTION_COMMANDS: Record<SetupAction, string> = {
 
 let extensionContext: vscode.ExtensionContext | undefined;
 let statusBarItem: vscode.StatusBarItem;
+let returnToCodexStatusBarItem: vscode.StatusBarItem;
 let animationTimer: NodeJS.Timeout | undefined;
 let frameIndex = 0;
 
@@ -60,7 +64,7 @@ let eventFileOffset = 0;
 let incompleteLine = '';
 
 let setupState: SetupState = 'notInstalled';
-let manualTestRunning = false;
+let hookReviewOpen = false;
 
 let activeTurnIds = new Set<string>();
 let observedHookEventTypes = new Set<CodexHookEvent['type']>();
@@ -68,6 +72,7 @@ let observedHookEventTypes = new Set<CodexHookEvent['type']>();
 export function activate(context: vscode.ExtensionContext): void {
   extensionContext = context;
   setupState = detectSetupState(context);
+  hookReviewOpen = context.globalState.get<boolean>(HOOK_REVIEW_OPEN_KEY) === true;
 
   statusBarItem = vscode.window.createStatusBarItem(
     'codexCat.status',
@@ -79,21 +84,19 @@ export function activate(context: vscode.ExtensionContext): void {
   renderIdleState();
   statusBarItem.show();
 
-  const startTestCommand = vscode.commands.registerCommand(
-    'codexCat.testStart',
-    () => {
-      manualTestRunning = true;
-      updateAnimationState();
-    }
+  returnToCodexStatusBarItem = vscode.window.createStatusBarItem(
+    'codexCat.returnToCodexStatus',
+    vscode.StatusBarAlignment.Right,
+    101
   );
-
-  const stopTestCommand = vscode.commands.registerCommand(
-    'codexCat.testStop',
-    () => {
-      manualTestRunning = false;
-      updateAnimationState();
-    }
+  returnToCodexStatusBarItem.name = 'Back to Codex';
+  returnToCodexStatusBarItem.text = '$(arrow-left) Back to Codex';
+  returnToCodexStatusBarItem.tooltip = 'Open a new Codex task';
+  returnToCodexStatusBarItem.command = RETURN_TO_CODEX_COMMAND;
+  returnToCodexStatusBarItem.backgroundColor = new vscode.ThemeColor(
+    'statusBarItem.warningBackground'
   );
+  updateReturnToCodexStatusBarItem();
 
   const installHooksCommand = vscode.commands.registerCommand(
     INSTALL_HOOKS_COMMAND,
@@ -115,14 +118,19 @@ export function activate(context: vscode.ExtensionContext): void {
     () => showHookReviewPrompt()
   );
 
+  const returnToCodexCommand = vscode.commands.registerCommand(
+    RETURN_TO_CODEX_COMMAND,
+    () => returnToCodex()
+  );
+
   context.subscriptions.push(
     statusBarItem,
-    startTestCommand,
-    stopTestCommand,
+    returnToCodexStatusBarItem,
     installHooksCommand,
     reinstallHooksCommand,
     uninstallHooksCommand,
-    reviewHooksCommand
+    reviewHooksCommand,
+    returnToCodexCommand
   );
 
   const watcher = initializeEventWatcher();
@@ -132,7 +140,6 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 export function deactivate(): void {
-  manualTestRunning = false;
   activeTurnIds.clear();
   observedHookEventTypes.clear();
   stopAnimation();
@@ -172,7 +179,7 @@ async function installHooksFromExtension(
     try {
       if (getCodexCatHookSignature()) {
         const action = await vscode.window.showInformationMessage(
-          'Codex Cat hooks are already installed.',
+          'Codex Cat is already set up.',
           REVIEW_HOOKS_ACTION,
           'Reinstall'
         );
@@ -186,20 +193,24 @@ async function installHooksFromExtension(
         return;
       }
     } catch (error) {
-      showSetupError('Could not inspect the existing Codex hooks.', error);
+      showSetupError('Couldn\'t check Codex Cat setup.', error);
       return;
     }
   }
 
+  const confirmationAction = reinstall ? 'Reinstall' : 'Set Up';
   const confirmation = await vscode.window.showInformationMessage(
-    reinstall
-      ? 'Reinstall the Codex Cat hooks? Existing Codex hooks will be preserved.'
-      : 'Install two Codex Cat hooks? Only event IDs and timestamps are stored; prompt content is never saved.',
-    { modal: true },
-    reinstall ? 'Reinstall' : 'Install'
+    reinstall ? 'Reinstall Codex Cat hooks?' : 'Set up Codex Cat?',
+    {
+      modal: true,
+      detail: reinstall
+        ? 'Your other Codex hooks and settings won\'t be changed.'
+        : 'Adds two hooks that detect when Codex starts and stops. Prompt content is never stored.'
+    },
+    confirmationAction
   );
 
-  if (confirmation !== (reinstall ? 'Reinstall' : 'Install')) {
+  if (confirmation !== confirmationAction) {
     return;
   }
 
@@ -207,7 +218,7 @@ async function installHooksFromExtension(
     const lastWorkingSignature = context.globalState.get<string>(
       LAST_WORKING_HOOK_SIGNATURE_KEY
     );
-    const result = installCodexCatHooks({
+    installCodexCatHooks({
       sourceHookPath: getBundledHookPath(context),
       runtimeExecutable: process.execPath
     });
@@ -230,15 +241,14 @@ async function installHooksFromExtension(
     }
 
     setupState = transition.state;
-    manualTestRunning = false;
+    await setHookReviewOpen(false);
     activeTurnIds.clear();
     observedHookEventTypes.clear();
     stopAnimation();
 
-    console.log('Codex Cat: hooks installed', result);
     if (!transition.showReviewPrompt) {
       void vscode.window.showInformationMessage(
-        'Codex Cat hooks were reinstalled without changing their definition.'
+        'Codex Cat hooks reinstalled.'
       );
     } else {
       await showHookReviewPrompt();
@@ -246,7 +256,7 @@ async function installHooksFromExtension(
   } catch (error) {
     setupState = 'configurationError';
     renderIdleState();
-    showSetupError('Codex Cat could not install its hooks.', error);
+    showSetupError('Couldn\'t set up Codex Cat.', error);
   }
 }
 
@@ -254,40 +264,40 @@ async function uninstallHooksFromExtension(
   context: vscode.ExtensionContext
 ): Promise<void> {
   const confirmation = await vscode.window.showWarningMessage(
-    'Remove the Codex Cat hooks? Other Codex hooks and settings will be preserved.',
-    { modal: true },
-    'Uninstall Hooks'
+    'Remove Codex Cat hooks?',
+    {
+      modal: true,
+      detail: 'Your other Codex hooks and settings won\'t be changed.'
+    },
+    'Remove'
   );
 
-  if (confirmation !== 'Uninstall Hooks') {
+  if (confirmation !== 'Remove') {
     return;
   }
 
   try {
-    const result = uninstallCodexCatHooks();
+    uninstallCodexCatHooks();
 
     await context.globalState.update(
       LAST_WORKING_HOOK_SIGNATURE_KEY,
       undefined
     );
     setupState = 'notInstalled';
-    manualTestRunning = false;
+    await setHookReviewOpen(false);
     activeTurnIds.clear();
     observedHookEventTypes.clear();
     stopAnimation();
 
-    console.log('Codex Cat: hooks uninstalled', result);
-    void vscode.window.showInformationMessage(
-      'Codex Cat hooks were removed. Other Codex hooks were preserved.'
-    );
+    void vscode.window.showInformationMessage('Codex Cat hooks removed.');
   } catch (error) {
-    showSetupError('Codex Cat could not remove its hooks.', error);
+    showSetupError('Couldn\'t remove Codex Cat hooks.', error);
   }
 }
 
 async function showHookReviewPrompt(): Promise<void> {
   const action = await vscode.window.showInformationMessage(
-    'Review UserPromptSubmit and Stop. Trust them if prompted, then select Reload hooks.',
+    'Review both Codex Cat hooks, then reload hooks.',
     REVIEW_HOOKS_ACTION
   );
 
@@ -309,6 +319,7 @@ async function openCodexHooksSettings(): Promise<void> {
     });
 
     if (await vscode.env.openExternal(hooksSettingsUri)) {
+      await setHookReviewOpen(true);
       return;
     }
   } catch (error) {
@@ -317,9 +328,21 @@ async function openCodexHooksSettings(): Promise<void> {
 
   void vscode.window.showWarningMessage(
     sidebarOpened
-      ? 'Open Codex Settings → Hooks, review both hooks, then reload hooks.'
-      : 'Open Codex manually → Settings → Hooks, review both hooks, then reload.'
+      ? 'Open Codex Settings → Hooks to finish setup.'
+      : 'Open Codex, then go to Settings → Hooks.'
   );
+}
+
+async function returnToCodex(): Promise<void> {
+  try {
+    await vscode.commands.executeCommand(CODEX_NEW_CHAT_COMMAND);
+    await setHookReviewOpen(false);
+  } catch (error) {
+    console.error('Codex Cat: could not return to Codex', error);
+    void vscode.window.showWarningMessage(
+      'Couldn\'t open Codex. Run “Codex: New Task in ChatGPT Sidebar” from the Command Palette.'
+    );
+  }
 }
 
 async function openCodexSidebar(): Promise<boolean> {
@@ -333,27 +356,28 @@ async function openCodexSidebar(): Promise<boolean> {
 }
 
 function showSetupError(message: string, error: unknown): void {
-  const detail = error instanceof Error ? error.message : String(error);
   console.error(message, error);
-  void vscode.window.showErrorMessage(`${message} ${detail}`);
+  void vscode.window.showErrorMessage(message);
 }
 
 function initializeEventWatcher(): vscode.Disposable | undefined {
   try {
-    fs.mkdirSync(EVENT_DIRECTORY, { recursive: true, mode: 0o700 });
-
-    if (process.platform !== 'win32') {
-      fs.chmodSync(EVENT_DIRECTORY, 0o700);
-    }
-
-    if (!fs.existsSync(EVENT_FILE)) {
-      fs.writeFileSync(EVENT_FILE, '', { encoding: 'utf8', mode: 0o600 });
-    } else if (process.platform !== 'win32') {
-      fs.chmodSync(EVENT_FILE, 0o600);
-    }
+    ensurePrivateEventDirectory();
+    ensureEventFileExists();
 
     // Ignore events recorded before this activation.
-    eventFileOffset = fs.statSync(EVENT_FILE).size;
+    const eventFileDescriptor = openEventFileForRead();
+
+    try {
+      if (process.platform !== 'win32') {
+        fs.fchmodSync(eventFileDescriptor, 0o600);
+      }
+
+      eventFileOffset = fs.fstatSync(eventFileDescriptor).size;
+    } finally {
+      fs.closeSync(eventFileDescriptor);
+    }
+
     incompleteLine = '';
 
     const eventFileListener = (current: fs.Stats, previous: fs.Stats): void => {
@@ -394,23 +418,24 @@ function resetEventReadState(): void {
 
 function readNewHookEvents(): void {
   try {
-    const fileStats = fs.statSync(EVENT_FILE);
-
-    // Read a recreated or truncated file from the beginning.
-    if (fileStats.size < eventFileOffset) {
-      resetEventReadState();
-    }
-
-    if (fileStats.size === eventFileOffset) {
-      return;
-    }
-
-    const bytesToRead = fileStats.size - eventFileOffset;
-    const buffer = Buffer.allocUnsafe(bytesToRead);
-    const fileDescriptor = fs.openSync(EVENT_FILE, 'r');
+    const fileDescriptor = openEventFileForRead();
+    let buffer: Buffer;
     let bytesRead = 0;
 
     try {
+      const fileStats = fs.fstatSync(fileDescriptor);
+
+      // Read a recreated or truncated file from the beginning.
+      if (fileStats.size < eventFileOffset) {
+        resetEventReadState();
+      }
+
+      if (fileStats.size === eventFileOffset) {
+        return;
+      }
+
+      const bytesToRead = fileStats.size - eventFileOffset;
+      buffer = Buffer.allocUnsafe(bytesToRead);
       bytesRead = fs.readSync(
         fileDescriptor,
         buffer,
@@ -418,39 +443,152 @@ function readNewHookEvents(): void {
         bytesToRead,
         eventFileOffset
       );
+      if (bytesRead === 0) {
+        return;
+      }
+
+      eventFileOffset += bytesRead;
+
+      const newText =
+        incompleteLine + buffer.subarray(0, bytesRead).toString('utf8');
+      const lines = newText.split(/\r?\n/);
+
+      // Keep a possibly incomplete final JSON line until the next read.
+      incompleteLine = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          continue;
+        }
+
+        const event = parseHookEvent(line);
+        if (event) {
+          handleHookEvent(event);
+        }
+      }
     } finally {
       fs.closeSync(fileDescriptor);
-    }
-
-    if (bytesRead === 0) {
-      return;
-    }
-
-    eventFileOffset += bytesRead;
-
-    const newText =
-      incompleteLine + buffer.subarray(0, bytesRead).toString('utf8');
-    const lines = newText.split(/\r?\n/);
-
-    // Keep a possibly incomplete final JSON line until the next read.
-    incompleteLine = lines.pop() ?? '';
-
-    for (const line of lines) {
-      if (!line.trim()) {
-        continue;
-      }
-
-      const event = parseHookEvent(line);
-      if (event) {
-        handleHookEvent(event);
-      }
     }
   } catch (error) {
     console.error('Codex Cat: failed to read event file', error);
   }
 }
 
+function ensurePrivateEventDirectory(): void {
+  let stats = lstatIfPresent(EVENT_DIRECTORY);
+
+  if (!stats) {
+    try {
+      fs.mkdirSync(EVENT_DIRECTORY, { mode: 0o700 });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+        throw error;
+      }
+    }
+
+    stats = fs.lstatSync(EVENT_DIRECTORY);
+  }
+
+  if (stats.isSymbolicLink() || !stats.isDirectory()) {
+    throw new Error('Codex Cat data path is not a real directory');
+  }
+
+  if (process.platform !== 'win32') {
+    const directoryDescriptor = fs.openSync(
+      EVENT_DIRECTORY,
+      fs.constants.O_RDONLY |
+        (fs.constants.O_DIRECTORY ?? 0) |
+        noFollowFlag()
+    );
+
+    try {
+      if (!fs.fstatSync(directoryDescriptor).isDirectory()) {
+        throw new Error('Codex Cat data path is not a real directory');
+      }
+
+      fs.fchmodSync(directoryDescriptor, 0o700);
+    } finally {
+      fs.closeSync(directoryDescriptor);
+    }
+  }
+}
+
+function ensureEventFileExists(): void {
+  const existing = lstatIfPresent(EVENT_FILE);
+
+  if (!existing) {
+    let fileDescriptor: number | undefined;
+
+    try {
+      fileDescriptor = fs.openSync(
+        EVENT_FILE,
+        fs.constants.O_CREAT |
+          fs.constants.O_EXCL |
+          fs.constants.O_WRONLY |
+          noFollowFlag(),
+        0o600
+      );
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+        throw error;
+      }
+    } finally {
+      if (fileDescriptor !== undefined) {
+        fs.closeSync(fileDescriptor);
+      }
+    }
+  }
+
+  const current = fs.lstatSync(EVENT_FILE);
+
+  if (current.isSymbolicLink() || !current.isFile()) {
+    throw new Error('Codex Cat event path is not a regular file');
+  }
+}
+
+function openEventFileForRead(): number {
+  const existing = lstatIfPresent(EVENT_FILE);
+
+  if (!existing || existing.isSymbolicLink() || !existing.isFile()) {
+    throw new Error('Codex Cat event path is not a regular file');
+  }
+
+  const fileDescriptor = fs.openSync(
+    EVENT_FILE,
+    fs.constants.O_RDONLY | noFollowFlag()
+  );
+
+  if (!fs.fstatSync(fileDescriptor).isFile()) {
+    fs.closeSync(fileDescriptor);
+    throw new Error('Codex Cat event path is not a regular file');
+  }
+
+  return fileDescriptor;
+}
+
+function noFollowFlag(): number {
+  return process.platform === 'win32'
+    ? 0
+    : (fs.constants.O_NOFOLLOW ?? 0);
+}
+
+function lstatIfPresent(filePath: string): fs.Stats | undefined {
+  try {
+    return fs.lstatSync(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
 function handleHookEvent(event: CodexHookEvent): void {
+  if (event.type === 'UserPromptSubmit') {
+    void setHookReviewOpen(false);
+  }
+
   observedHookEventTypes = updateObservedHookEventTypes(
     observedHookEventTypes,
     event
@@ -493,7 +631,7 @@ function recordWorkingHookSignature(): void {
 }
 
 function updateAnimationState(): void {
-  const shouldAnimate = manualTestRunning || activeTurnIds.size > 0;
+  const shouldAnimate = activeTurnIds.size > 0;
 
   if (shouldAnimate) {
     startAnimation();
@@ -508,7 +646,7 @@ function startAnimation(): void {
   }
 
   statusBarItem.command = undefined;
-  statusBarItem.tooltip = 'Codex Cat: Codex is working';
+  statusBarItem.tooltip = 'Codex is working';
   frameIndex = 0;
   statusBarItem.text = RUNNING_CAT_FRAMES[frameIndex];
 
@@ -541,6 +679,37 @@ function renderIdleState(): void {
   statusBarItem.command = presentation.action
     ? SETUP_ACTION_COMMANDS[presentation.action]
     : undefined;
+}
+
+async function setHookReviewOpen(open: boolean): Promise<void> {
+  const changed = hookReviewOpen !== open;
+  hookReviewOpen = open;
+  updateReturnToCodexStatusBarItem();
+
+  if (!changed || !extensionContext) {
+    return;
+  }
+
+  try {
+    await extensionContext.globalState.update(
+      HOOK_REVIEW_OPEN_KEY,
+      open ? true : undefined
+    );
+  } catch (error) {
+    console.error('Codex Cat: failed to save Hooks navigation state', error);
+  }
+}
+
+function updateReturnToCodexStatusBarItem(): void {
+  if (!returnToCodexStatusBarItem) {
+    return;
+  }
+
+  if (hookReviewOpen) {
+    returnToCodexStatusBarItem.show();
+  } else {
+    returnToCodexStatusBarItem.hide();
+  }
 }
 
 function clearAnimationTimer(): void {

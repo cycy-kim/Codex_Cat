@@ -45,15 +45,30 @@ async function main() {
 }
 
 function appendEvent(event) {
-  fs.mkdirSync(eventDirectory, { recursive: true, mode: 0o700 });
+  ensurePrivateEventDirectory();
+  const existingEventFile = lstatIfPresent(eventFile);
 
-  if (process.platform !== 'win32') {
-    fs.chmodSync(eventDirectory, 0o700);
+  if (
+    existingEventFile &&
+    (existingEventFile.isSymbolicLink() || !existingEventFile.isFile())
+  ) {
+    throw new Error('Codex Cat event path is not a regular file');
   }
 
-  const fileDescriptor = fs.openSync(eventFile, 'a', 0o600);
+  const fileDescriptor = fs.openSync(
+    eventFile,
+    fs.constants.O_APPEND |
+      fs.constants.O_CREAT |
+      fs.constants.O_WRONLY |
+      noFollowFlag(),
+    0o600
+  );
 
   try {
+    if (!fs.fstatSync(fileDescriptor).isFile()) {
+      throw new Error('Codex Cat event path is not a regular file');
+    }
+
     if (process.platform !== 'win32') {
       fs.fchmodSync(fileDescriptor, 0o600);
     }
@@ -65,6 +80,56 @@ function appendEvent(event) {
     fs.writeFileSync(fileDescriptor, `${JSON.stringify(event)}\n`, 'utf8');
   } finally {
     fs.closeSync(fileDescriptor);
+  }
+}
+
+function ensurePrivateEventDirectory() {
+  let stats = lstatIfPresent(eventDirectory);
+
+  if (!stats) {
+    fs.mkdirSync(eventDirectory, { mode: 0o700 });
+    stats = fs.lstatSync(eventDirectory);
+  }
+
+  if (stats.isSymbolicLink() || !stats.isDirectory()) {
+    throw new Error('Codex Cat data path is not a real directory');
+  }
+
+  if (process.platform !== 'win32') {
+    const directoryDescriptor = fs.openSync(
+      eventDirectory,
+      fs.constants.O_RDONLY |
+        (fs.constants.O_DIRECTORY ?? 0) |
+        noFollowFlag()
+    );
+
+    try {
+      if (!fs.fstatSync(directoryDescriptor).isDirectory()) {
+        throw new Error('Codex Cat data path is not a real directory');
+      }
+
+      fs.fchmodSync(directoryDescriptor, 0o700);
+    } finally {
+      fs.closeSync(directoryDescriptor);
+    }
+  }
+}
+
+function noFollowFlag() {
+  return process.platform === 'win32'
+    ? 0
+    : (fs.constants.O_NOFOLLOW ?? 0);
+}
+
+function lstatIfPresent(filePath) {
+  try {
+    return fs.lstatSync(filePath);
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return undefined;
+    }
+
+    throw error;
   }
 }
 

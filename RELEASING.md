@@ -1,18 +1,18 @@
 # Releasing Codex Cat
 
-## One-time Marketplace metadata
+## Marketplace metadata
 
-Before the first public release, add values owned by the publisher to
-`package.json`:
+The extension manifest uses the Marketplace publisher ID `codex-cat` and the
+display name `Codex Cat`. Before the first release, create or confirm a
+Marketplace publisher whose ID is exactly `codex-cat`; the display name alone
+is not the publisher ID.
 
-- `publisher`: the Visual Studio Marketplace publisher ID (required).
-- `repository`, `bugs`, and `homepage`: the public project locations.
-- `license` and a matching root `LICENSE` file.
-- `icon`: a 128×128 or larger PNG used by the Marketplace listing.
+The public repository links, MIT code license, and 256×256 PNG Marketplace icon
+are included in `package.json` and the repository root.
 
-Confirm that every bundled font glyph and source SVG may be redistributed
-under the selected license. Do not use placeholder publisher or repository
-values in a public release.
+Confirm that the icon, every bundled font glyph, and its source SVG may be
+redistributed. These visual assets are not covered by the MIT code license
+unless their source includes a separate license notice.
 
 ## Release check
 
@@ -31,12 +31,9 @@ publisher identity and release credentials are configured.
 
 `package:check` prints the exact VSIX contents. The runtime package should
 contain only the manifest and documentation, `dist/extension.js`,
-`dist/uninstall.js`, `media/codex-cat-frames.woff`, and
+`dist/uninstall.js`, `icon.png`, `media/codex-cat-frames.woff`, and
 `scripts/codex-cat-hook.cjs`.
 
-If an intentional runtime file such as a Marketplace icon is added later,
-update the allowlist in `tools/verify-package-contents.cjs` in the same change.
-
 Install the generated VSIX in a clean VS Code profile and verify setup, hook
-trust, animation start/stop, hook reinstall, and extension removal before
-publishing it with `vsce publish`.
+trust, Back to Codex navigation, animation start/stop, hook reinstall, and
+extension removal before publishing it with `vsce publish`.

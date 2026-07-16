@@ -6,14 +6,15 @@ const { listFiles } = require('@vscode/vsce');
 const projectRoot = path.resolve(__dirname, '..');
 const requiredFiles = [
   'CHANGELOG.md',
+  'LICENSE',
   'README.md',
   'dist/extension.js',
   'dist/uninstall.js',
+  'icon.png',
   'media/codex-cat-frames.woff',
   'package.json',
   'scripts/codex-cat-hook.cjs'
 ];
-const optionalFilePatterns = [/^LICENSE(?:\..+)?$/i];
 
 async function main() {
   const packagedFiles = (await listFiles({ cwd: projectRoot }))
@@ -24,9 +25,7 @@ async function main() {
     (file) => !packagedFileSet.has(file)
   );
   const unexpectedFiles = packagedFiles.filter(
-    (file) =>
-      !requiredFiles.includes(file) &&
-      !optionalFilePatterns.some((pattern) => pattern.test(file))
+    (file) => !requiredFiles.includes(file)
   );
 
   if (missingFiles.length > 0 || unexpectedFiles.length > 0) {

@@ -58,7 +58,10 @@ export function getCodexCatHookSignature(
 ): string | undefined {
   const { hooksConfigPath, installedHookPath } = getHookPaths(homeDirectory);
 
-  if (!fs.existsSync(hooksConfigPath) || !fs.existsSync(installedHookPath)) {
+  if (
+    !requireRegularFileIfPresent(hooksConfigPath, 'Codex hooks config') ||
+    !requireRegularFileIfPresent(installedHookPath, 'Codex Cat hook script')
+  ) {
     return undefined;
   }
 
@@ -88,8 +91,11 @@ export function isCodexCatHookCurrent(
 
   if (
     !fs.existsSync(sourceHookPath) ||
-    !fs.existsSync(installedHookPath) ||
-    !fs.existsSync(hooksConfigPath)
+    !requireRegularFileIfPresent(
+      installedHookPath,
+      'Codex Cat hook script'
+    ) ||
+    !requireRegularFileIfPresent(hooksConfigPath, 'Codex hooks config')
   ) {
     return false;
   }
@@ -152,8 +158,12 @@ export function installCodexCatHooks(
     hooks
   };
 
-  fs.mkdirSync(paths.installDirectory, { recursive: true });
+  ensurePrivateDirectory(paths.installDirectory, 'Codex Cat data directory');
   fs.mkdirSync(paths.codexDirectory, { recursive: true });
+  requireRegularFileIfPresent(
+    paths.installedHookPath,
+    'Codex Cat hook script'
+  );
 
   const backupPath = existing.existed
     ? createBackup(paths.hooksConfigPath)
@@ -183,6 +193,17 @@ export function uninstallCodexCatHooks(
   homeDirectory: string = os.homedir()
 ): HookUninstallResult {
   const paths = getHookPaths(homeDirectory);
+  requireDirectoryIfPresent(
+    paths.installDirectory,
+    'Codex Cat data directory'
+  );
+  requireRegularFileIfPresent(
+    paths.installedHookPath,
+    'Codex Cat hook script'
+  );
+  const eventFilePath = path.join(paths.installDirectory, EVENT_FILENAME);
+  requireRegularFileIfPresent(eventFilePath, 'Codex Cat event file');
+
   const existing = readExistingConfig(paths.hooksConfigPath);
   const hooks = cloneHooks(existing.config.hooks);
   const removedHandlers = removeCodexCatHandlers(
@@ -205,7 +226,6 @@ export function uninstallCodexCatHooks(
     removedHookScript = true;
   }
 
-  const eventFilePath = path.join(paths.installDirectory, EVENT_FILENAME);
   let removedEventFile = false;
   if (fs.existsSync(eventFilePath)) {
     fs.unlinkSync(eventFilePath);
@@ -232,7 +252,12 @@ export function uninstallCodexCatHooks(
 }
 
 function readExistingConfig(hooksConfigPath: string): ExistingConfig {
-  if (!fs.existsSync(hooksConfigPath)) {
+  if (
+    !requireRegularFileIfPresent(
+      hooksConfigPath,
+      'Codex hooks config'
+    )
+  ) {
     return { config: {}, existed: false };
   }
 
@@ -415,9 +440,30 @@ function handlerCommands(handler: JsonObject): string[] {
 
 function createBackup(hooksConfigPath: string): string {
   const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-');
-  const backupPath = `${hooksConfigPath}.codex-cat-backup-${timestamp}`;
-  fs.copyFileSync(hooksConfigPath, backupPath);
-  return backupPath;
+  const backupPath =
+    `${hooksConfigPath}.codex-cat-backup-${timestamp}-` + crypto.randomUUID();
+  let backupCreated = false;
+
+  try {
+    fs.copyFileSync(
+      hooksConfigPath,
+      backupPath,
+      fs.constants.COPYFILE_EXCL
+    );
+    backupCreated = true;
+
+    if (process.platform !== 'win32') {
+      fs.chmodSync(backupPath, 0o600);
+    }
+
+    return backupPath;
+  } catch (error) {
+    if (backupCreated) {
+      fs.rmSync(backupPath, { force: true });
+    }
+
+    throw error;
+  }
 }
 
 function writeConfig(hooksConfigPath: string, config: JsonObject): void {
@@ -447,6 +493,84 @@ function writeFileAtomically(filePath: string, content: string | Buffer): void {
     }
 
     fs.rmSync(temporaryPath, { force: true });
+    throw error;
+  }
+}
+
+function ensurePrivateDirectory(
+  directoryPath: string,
+  description: string
+): void {
+  const existing = lstatIfPresent(directoryPath);
+
+  if (!existing) {
+    fs.mkdirSync(directoryPath, { mode: 0o700 });
+  }
+
+  requireDirectoryIfPresent(directoryPath, description);
+
+  if (process.platform !== 'win32') {
+    const directoryDescriptor = fs.openSync(
+      directoryPath,
+      fs.constants.O_RDONLY |
+        (fs.constants.O_DIRECTORY ?? 0) |
+        (fs.constants.O_NOFOLLOW ?? 0)
+    );
+
+    try {
+      if (!fs.fstatSync(directoryDescriptor).isDirectory()) {
+        throw new Error(`${description} must be a real directory`);
+      }
+
+      fs.fchmodSync(directoryDescriptor, 0o700);
+    } finally {
+      fs.closeSync(directoryDescriptor);
+    }
+  }
+}
+
+function requireDirectoryIfPresent(
+  directoryPath: string,
+  description: string
+): boolean {
+  const stats = lstatIfPresent(directoryPath);
+
+  if (!stats) {
+    return false;
+  }
+
+  if (stats.isSymbolicLink() || !stats.isDirectory()) {
+    throw new Error(`${description} must be a real directory`);
+  }
+
+  return true;
+}
+
+function requireRegularFileIfPresent(
+  filePath: string,
+  description: string
+): boolean {
+  const stats = lstatIfPresent(filePath);
+
+  if (!stats) {
+    return false;
+  }
+
+  if (stats.isSymbolicLink() || !stats.isFile()) {
+    throw new Error(`${description} must be a regular file`);
+  }
+
+  return true;
+}
+
+function lstatIfPresent(filePath: string): fs.Stats | undefined {
+  try {
+    return fs.lstatSync(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return undefined;
+    }
+
     throw error;
   }
 }

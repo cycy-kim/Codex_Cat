@@ -95,6 +95,10 @@ suite('Codex Cat hook manager', () => {
     assert.ok(fs.existsSync(result.backupPath));
     assert.ok(fs.existsSync(paths.installedHookPath));
 
+    if (process.platform !== 'win32') {
+      assert.strictEqual(fs.statSync(result.backupPath).mode & 0o777, 0o600);
+    }
+
     const command = firstCatCommand(hooks.UserPromptSubmit);
     assert.ok(command.includes('CODEX_CAT_HOOK=1'));
     assert.ok(command.includes('CODEX_CAT_HOOK_VERSION='));
@@ -134,6 +138,46 @@ suite('Codex Cat hook manager', () => {
       '{ broken'
     );
     assert.strictEqual(fs.existsSync(paths.installedHookPath), false);
+  });
+
+  test('does not follow symlinked Codex Cat or hooks config paths', function() {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
+    const paths = getHookPaths(homeDirectory);
+    const redirectedDirectory = path.join(homeDirectory, 'redirected-data');
+    fs.mkdirSync(redirectedDirectory);
+    fs.symlinkSync(redirectedDirectory, paths.installDirectory, 'dir');
+
+    assert.throws(
+      () => installCodexCatHooks({ sourceHookPath, homeDirectory }),
+      /real directory/
+    );
+    assert.throws(
+      () => uninstallCodexCatHooks(homeDirectory),
+      /real directory/
+    );
+    assert.strictEqual(
+      fs.existsSync(path.join(redirectedDirectory, HOOK_FILENAME)),
+      false
+    );
+
+    fs.unlinkSync(paths.installDirectory);
+    fs.mkdirSync(paths.codexDirectory, { recursive: true });
+    const redirectedConfig = path.join(homeDirectory, 'redirected-hooks.json');
+    const originalConfig = '{"hooks":{}}\n';
+    fs.writeFileSync(redirectedConfig, originalConfig, 'utf8');
+    fs.symlinkSync(redirectedConfig, paths.hooksConfigPath, 'file');
+
+    assert.throws(
+      () => installCodexCatHooks({ sourceHookPath, homeDirectory }),
+      /regular file/
+    );
+    assert.strictEqual(
+      fs.readFileSync(redirectedConfig, 'utf8'),
+      originalConfig
+    );
   });
 
   test('uninstalls only Codex Cat handlers', () => {
@@ -276,6 +320,41 @@ suite('Codex Cat hook manager', () => {
     const event = JSON.parse(fs.readFileSync(eventFile, 'utf8')) as JsonObject;
     assert.strictEqual(event.type, 'Stop');
     assert.strictEqual(event.turnId, 'turn-test');
+  });
+
+  test('does not follow a symlinked event file', function() {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
+    const eventDirectory = path.join(homeDirectory, '.codex-cat');
+    const eventFile = path.join(eventDirectory, EVENT_FILENAME);
+    const protectedFile = path.join(homeDirectory, 'protected.txt');
+    const protectedContent = 'must remain unchanged\n';
+    fs.mkdirSync(eventDirectory);
+    fs.writeFileSync(protectedFile, protectedContent, 'utf8');
+    fs.symlinkSync(protectedFile, eventFile, 'file');
+
+    const hookResult = spawnSync(process.execPath, [getBundledHookPath()], {
+      input: JSON.stringify({
+        hook_event_name: 'Stop',
+        session_id: 'session-test',
+        turn_id: 'turn-test'
+      }),
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        HOME: homeDirectory,
+        USERPROFILE: homeDirectory
+      }
+    });
+
+    assert.strictEqual(hookResult.status, 0, hookResult.stderr);
+    assert.strictEqual(hookResult.stdout, '{}');
+    assert.strictEqual(
+      fs.readFileSync(protectedFile, 'utf8'),
+      protectedContent
+    );
   });
 });
 

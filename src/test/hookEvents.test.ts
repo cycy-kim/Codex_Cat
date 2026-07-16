@@ -8,7 +8,7 @@ import {
 } from '../hookEvents';
 
 suite('Codex Cat hook events', () => {
-  test('tracks concurrent turns by turn ID', () => {
+  test('tracks concurrent work in different sessions', () => {
     let activeTurnIds = new Set<string>();
 
     activeTurnIds = updateActiveTurnIds(
@@ -64,32 +64,60 @@ suite('Codex Cat hook events', () => {
     assert.strictEqual(activeTurnIds.size, 0);
   });
 
-  test('removes both the turn key and matching session fallback on stop', () => {
+  test('replaces an orphaned turn when the same session submits again', () => {
     let activeTurnIds = updateActiveTurnIds(
       new Set<string>(),
       event('UserPromptSubmit', 'session-1', 'turn-1')
     );
     activeTurnIds = updateActiveTurnIds(
       activeTurnIds,
-      event('UserPromptSubmit', 'session-1')
+      event('UserPromptSubmit', 'session-1', 'turn-2')
     );
     activeTurnIds = updateActiveTurnIds(
       activeTurnIds,
-      event('UserPromptSubmit', 'session-2', 'turn-2')
+      event('UserPromptSubmit', 'session-2', 'turn-3')
     );
 
-    assert.strictEqual(activeTurnIds.size, 3);
+    assert.strictEqual(activeTurnIds.size, 2);
 
     activeTurnIds = updateActiveTurnIds(
       activeTurnIds,
-      event('Stop', 'session-1', 'turn-1')
+      event('Stop', 'session-1', 'turn-2')
     );
 
     assert.strictEqual(activeTurnIds.size, 1);
 
     activeTurnIds = updateActiveTurnIds(
       activeTurnIds,
-      event('Stop', 'session-2', 'turn-2')
+      event('Stop', 'session-2', 'turn-3')
+    );
+
+    assert.strictEqual(activeTurnIds.size, 0);
+  });
+
+  test('clears a session even when the stop reports another turn ID', () => {
+    let activeTurnIds = updateActiveTurnIds(
+      new Set<string>(),
+      event('UserPromptSubmit', 'session-1', 'turn-1')
+    );
+
+    activeTurnIds = updateActiveTurnIds(
+      activeTurnIds,
+      event('Stop', 'session-1', 'turn-2')
+    );
+
+    assert.strictEqual(activeTurnIds.size, 0);
+  });
+
+  test('tracks a turn without a session until its matching stop', () => {
+    let activeTurnIds = updateActiveTurnIds(
+      new Set<string>(),
+      event('UserPromptSubmit', undefined, 'turn-1')
+    );
+
+    activeTurnIds = updateActiveTurnIds(
+      activeTurnIds,
+      event('Stop', undefined, 'turn-1')
     );
 
     assert.strictEqual(activeTurnIds.size, 0);

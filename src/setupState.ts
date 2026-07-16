@@ -76,32 +76,30 @@ export function getIdleStatusPresentation(
   switch (state) {
     case 'notInstalled':
       return {
-        suffix: 'Setup',
-        tooltip: 'Codex Cat: click to install Codex hooks',
+        suffix: 'Set up',
+        tooltip: 'Set up Codex Cat',
         action: 'install'
       };
     case 'updateRequired':
       return {
-        suffix: 'Update hooks',
-        tooltip: 'Codex Cat: click to update the installed hook script',
+        suffix: 'Update',
+        tooltip: 'Update Codex Cat',
         action: 'reinstall'
       };
     case 'installedUnconfirmed':
       return {
-        tooltip:
-          'Codex Cat: send a Codex message to verify setup; click if animation does not start',
+        tooltip: 'Review Codex Cat hooks',
         action: 'review'
       };
     case 'configurationError':
       return {
-        suffix: 'Setup error',
-        tooltip:
-          'Codex Cat: hooks.json could not be read safely; click for setup',
+        suffix: 'Setup needed',
+        tooltip: 'Codex Cat needs setup. Click to fix.',
         action: 'install'
       };
     case 'workingObserved':
       return {
-        tooltip: 'Codex Cat: waiting for Codex'
+        tooltip: 'Waiting for Codex'
       };
   }
 }

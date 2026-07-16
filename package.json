@@ -3,6 +3,9 @@
   "displayName": "Codex Cat",
   "description": "A status bar cat that animates while Codex is working",
   "version": "0.0.1",
+  "publisher": "cy-kim",
+  "license": "SEE LICENSE IN LICENSE",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cycy-kim/Codex_Cat.git"
@@ -454,12 +457,8 @@
         "title": "Codex Cat: Uninstall Hooks"
       },
       {
-        "command": "codexCat.testStart",
-        "title": "Codex Cat: Test Start"
-      },
-      {
-        "command": "codexCat.testStop",
-        "title": "Codex Cat: Test Stop"
+        "command": "codexCat.returnToCodex",
+        "title": "Codex Cat: Back to Codex"
       }
     ]
   },

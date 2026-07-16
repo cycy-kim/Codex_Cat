@@ -84,4 +84,32 @@ suite('Codex Cat setup state', () => {
       'updateRequired'
     );
   });
+
+  test('uses concise user-facing status text', () => {
+    assert.deepStrictEqual(getIdleStatusPresentation('notInstalled'), {
+      suffix: 'Set up',
+      tooltip: 'Set up Codex Cat',
+      action: 'install'
+    });
+    assert.deepStrictEqual(getIdleStatusPresentation('updateRequired'), {
+      suffix: 'Update',
+      tooltip: 'Update Codex Cat',
+      action: 'reinstall'
+    });
+    assert.deepStrictEqual(
+      getIdleStatusPresentation('installedUnconfirmed'),
+      {
+        tooltip: 'Review Codex Cat hooks',
+        action: 'review'
+      }
+    );
+    assert.deepStrictEqual(getIdleStatusPresentation('configurationError'), {
+      suffix: 'Setup needed',
+      tooltip: 'Codex Cat needs setup. Click to fix.',
+      action: 'install'
+    });
+    assert.deepStrictEqual(getIdleStatusPresentation('workingObserved'), {
+      tooltip: 'Waiting for Codex'
+    });
+  });
 });
