@@ -23,6 +23,7 @@ coverage/**
 animation-sources/**
 cat-animation.json
 use_case.mp4
+use_case.gif
 
 # Build and release configuration
 package-lock.json

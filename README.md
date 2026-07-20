@@ -1,19 +1,8 @@
 # Codex Cat
 
+[![Codex Cat in action](use_case.gif)](https://github.com/user-attachments/assets/3de3e553-f0c0-4221-ab78-34e82427eb83)
+
 Codex Cat shows Codex activity as an animated cat on the right side of the VS Code status bar. No terminal setup or globally installed `codex` command is required.
-
-## Demo
-
-<video
-  src="use_case.mp4"
-  title="Codex Cat in action"
-  width="560"
-  autoplay
-  loop
-  muted
-  playsinline
-  controls
-></video>
 
 ## Initial Setup
 
