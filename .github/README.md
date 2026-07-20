@@ -11,16 +11,7 @@ The animation starts when Codex sends a `UserPromptSubmit` hook event and stops 
 
 ## Demo
 
-<video
-  src="../use_case.mp4"
-  title="Codex Cat in action"
-  width="560"
-  autoplay
-  loop
-  muted
-  playsinline
-  controls
-></video>
+[Watch Codex Cat in action](../use_case.mp4)
 
 ## Initial Setup
 
