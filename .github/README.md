@@ -9,11 +9,24 @@ Codex Cat shows Codex activity on the right side of the VS Code status bar.
 
 The animation starts when Codex sends a `UserPromptSubmit` hook event and stops when it sends a `Stop` event.
 
+## Demo
+
+<video
+  src="../use_case.mp4"
+  title="Codex Cat in action"
+  width="560"
+  autoplay
+  loop
+  muted
+  playsinline
+  controls
+></video>
+
 ## Initial Setup
 
 No terminal setup or globally installed `codex` command is required.
 
-1. Click `🐱 Set up` in the status bar and approve the installation.
+1. Click `Set up` in the status bar and approve the installation.
 2. Click **Review Hooks** in the notification.
 3. Review the `UserPromptSubmit` and `Stop` hooks, then trust them if Codex asks you to do so.
 4. Select **Reload hooks**.
