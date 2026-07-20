@@ -1,6 +1,6 @@
 
 
-https://github.com/user-attachments/assets/3de3e553-f0c0-4221-ab78-34e82427eb83
+
 
 # Codex Cat
 
@@ -15,7 +15,7 @@ The animation starts when Codex sends a `UserPromptSubmit` hook event and stops 
 
 ## Demo
 
-[Watch Codex Cat in action](../use_case.mp4)
+[[Watch Codex Cat in action](../use_case.mp4)](https://github.com/user-attachments/assets/3de3e553-f0c0-4221-ab78-34e82427eb83)
 
 ## Initial Setup
 
