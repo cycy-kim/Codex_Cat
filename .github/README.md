@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/3de3e553-f0c0-4221-ab78-34e82427eb83
+
 # Codex Cat
 
 Codex Cat shows Codex activity on the right side of the VS Code status bar.
